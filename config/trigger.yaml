@@ -1,0 +1,26 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: event-display-trigger
+spec:
+  broker: default
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: event-display
+---
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: cloudevents-player-trigger
+spec:
+  broker: default
+  filters:
+  - suffix:
+      type: dev.knative
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: cloudevents-player

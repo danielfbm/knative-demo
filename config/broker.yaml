@@ -1,0 +1,17 @@
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  annotations:
+    eventing.knative.dev/broker.class: MTChannelBasedBroker
+  name: default
+  namespace: eventing-demo
+spec:
+  config:
+    apiVersion: v1
+    kind: ConfigMap
+    name: config-br-default-channel
+    namespace: knative-eventing
+  delivery:
+    backoffDelay: PT0.2S
+    backoffPolicy: exponential
+    retry: 10

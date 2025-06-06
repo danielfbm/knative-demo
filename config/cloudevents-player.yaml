@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudevents-player
+  namespace: eventing-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: cloudevents-player
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+        - name: cloudevents-player
+          image: quay.io/ruben/cloudevents-player:v1.3
+          env:
+          - name: BROKER_NAME
+            value: default
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: cloudevents-player
+  namespace: eventing-demo
+spec:
+  selector:
+    app: cloudevents-player
+
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
