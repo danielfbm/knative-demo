@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: knative-eventing-selfsigned-ca
+  namespace: cert-manager # the cert-manager operator namespace
+spec:
+   # Secret name later used for the ClusterIssuer for Eventing
+  secretName: knative-eventing-ca
+
+  isCA: true
+  commonName: selfsigned-ca
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+
+  issuerRef:
+    name: knative-eventing-selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io

@@ -1,0 +1,10 @@
+# This is the issuer that every Eventing component use to issue their server's certs.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: knative-eventing-ca-issuer
+spec:
+  ca:
+    # Secret name in the Cert-Manager Operator namespace (cert-manager by default) containing
+    # the certificate that can then be used by Knative Eventing components for new certificates.
+    secretName: knative-eventing-ca

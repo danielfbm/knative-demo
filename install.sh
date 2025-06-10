@@ -1,3 +1,4 @@
+#!/bin/sh
 
 function say () {
     echo "==> $1"
@@ -14,4 +15,5 @@ kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v
 
 say "Installing knative v1.18.1 mt-channel-broker..."
 kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.18.1/mt-channel-broker.yaml
+
 
