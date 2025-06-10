@@ -1,0 +1,46 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: color-demo-app
+  namespace: knative-demo
+  annotations:
+    # Scale to zero when not in use
+    autoscaling.knative.dev/minScale: "0"
+    autoscaling.knative.dev/maxScale: "10"
+    # Target 10 concurrent requests per pod
+    autoscaling.knative.dev/target: "10"
+spec:
+  template:
+    metadata:
+      annotations:
+        # CloudEvents sink annotation
+        events.knative.dev/sink: "true"
+    spec:
+      containers:
+      - name: color-demo
+        image: docker.io/danielfbm/color-demo:latest  # Replace with your actual image
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SERVER_PORT
+          value: "8080"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /cloudevents/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /cloudevents/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5

@@ -1,0 +1,16 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: color-change-trigger
+  namespace: knative-demo
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: com.example.color.change
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: color-demo-app
+    uri: /cloudevents
