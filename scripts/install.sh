@@ -1,8 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-function say () {
-    echo "==> $1"
-}
+# Source the common library
+source "$(dirname "$0")/library.sh"
 
 say "Installing knative v1.18.1 crds..."
 kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.18.1/eventing-crds.yaml
@@ -15,5 +14,7 @@ kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v
 
 say "Installing knative v1.18.1 mt-channel-broker..."
 kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.18.1/mt-channel-broker.yaml
+
+say_success "Knative Eventing installation completed!"
 
 

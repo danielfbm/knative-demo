@@ -6,11 +6,12 @@ metadata:
 spec:
   broker: default
   filter:
-    attributes:
+  - attributes:
       type: com.example.color.change
   subscriber:
     ref:
-      apiVersion: serving.knative.dev/v1
+      # apiVersion: serving.knative.dev/v1
+      apiVersion: v1
       kind: Service
-      name: color-demo-app
+      name: color-demo-service
     uri: /cloudevents
