@@ -83,8 +83,7 @@ public class CloudEventSinkController {
                     System.err.println("Failed to process color change from CloudEvent: " + e.getMessage());
                 }
             }
-
-            return ResponseEntity.ok("Event received successfully");
+            return ResponseEntity.accepted().build();
 
         } catch (Exception e) {
             System.err.println("Failed to process CloudEvent: " + e.getMessage());

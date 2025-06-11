@@ -5,8 +5,11 @@ metadata:
 spec:
   broker: default
   filters:
-  - suffix:
-      type: dev.knative
+  - any:
+    - suffix:
+        type: dev.knative
+    - exact:
+        type: com.example.color.change
   subscriber:
     ref:
       apiVersion: v1

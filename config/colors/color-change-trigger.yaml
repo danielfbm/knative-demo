@@ -2,11 +2,11 @@ apiVersion: eventing.knative.dev/v1
 kind: Trigger
 metadata:
   name: color-change-trigger
-  namespace: knative-demo
+  namespace: eventing-demo
 spec:
   broker: default
-  filter:
-  - attributes:
+  filters:
+  - exact:
       type: com.example.color.change
   subscriber:
     ref:
