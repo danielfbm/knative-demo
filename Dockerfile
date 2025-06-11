@@ -1,5 +1,6 @@
 # Use OpenJDK 17 as the base image
-FROM eclipse-temurin:17-jdk-noble
+ARG BASE_IMAGE=eclipse-temurin:17-jdk-noble
+FROM ${BASE_IMAGE}
 
 # Set working directory
 WORKDIR /app
