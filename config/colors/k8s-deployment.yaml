@@ -18,7 +18,7 @@ spec:
       containers:
       - name: color-demo
         image: danielfbm/color-demo:latest
-        imagePullPolicy: Never  # Use local image in OrbStack
+        imagePullPolicy: IfNotPresent  # Use local image in OrbStack
         ports:
         - containerPort: 8080
         env:
@@ -52,7 +52,7 @@ metadata:
   labels:
     app: color-demo
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
   - port: 80
     targetPort: 8080

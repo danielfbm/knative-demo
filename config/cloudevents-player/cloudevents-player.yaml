@@ -18,6 +18,11 @@ spec:
           env:
           - name: BROKER_NAME
             value: default
+          - name: BROKER_NAMESPACE
+            value: eventing-demo
+          # - name: BROKER_URI
+          #   value: http://broker-ingress.knative-operator.svc.cluster.local/eventing-demo/default
+
 
 ---
 

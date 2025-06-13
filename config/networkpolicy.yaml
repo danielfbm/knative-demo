@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eventing-demo-ns
+  namespace: eventing-demo
+spec:
+  podSelector: {}
+    # matchLabels:
+    #   messaging.knative.dev/channel: my-channel
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/name: knative-eventing
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: knative-eventing
+  - from:
+    - ipBlock:
+        cidr: 192.168.139.0/16
+    # ports:
+    # - protocol: TCP
+    #   port: 31933
+    # - protocol: TCP
+    #   port: 30471
+  # egress:
+  # # Temporarily allow all egress traffic to test functionality
+  # - {}
