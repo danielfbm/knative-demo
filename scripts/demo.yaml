@@ -1,0 +1,3 @@
+# - quay.io/ruben/cloudevents-player:v1.3
+- devops-harbor.alaudatech.net/library/knative-color:latest
+- devops-harbor.alaudatech.net/library/cloudevents-player:v1.3

@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: color-demo
-        image: danielfbm/color-demo:latest
+        # image: danielfbm/color-demo:latest
+        image: devops-harbor.alaudatech.net/library/knative-color:latest
         imagePullPolicy: IfNotPresent  # Use local image in OrbStack
         ports:
         - containerPort: 8080
