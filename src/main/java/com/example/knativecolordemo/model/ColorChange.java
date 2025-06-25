@@ -1,7 +1,7 @@
 package com.example.knativecolordemo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "color_changes")
@@ -16,14 +16,14 @@ public class ColorChange {
     private Color color;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     @Column
     private String source;
 
     public ColorChange() {}
 
-    public ColorChange(Color color, LocalDateTime timestamp, String source) {
+    public ColorChange(Color color, ZonedDateTime timestamp, String source) {
         this.color = color;
         this.timestamp = timestamp;
         this.source = source;
@@ -36,8 +36,8 @@ public class ColorChange {
     public Color getColor() { return color; }
     public void setColor(Color color) { this.color = color; }
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public ZonedDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(ZonedDateTime timestamp) { this.timestamp = timestamp; }
 
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }

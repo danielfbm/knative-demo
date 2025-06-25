@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
@@ -45,10 +48,10 @@ public class CloudEventSinkController {
             if (eventType == null) eventType = "unknown.event";
             if (source == null) source = "unknown-source";
 
-            LocalDateTime timestamp = LocalDateTime.now();
+            ZonedDateTime timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault());
             if (timeHeader != null) {
                 try {
-                    timestamp = OffsetDateTime.parse(timeHeader).toLocalDateTime();
+                    timestamp = OffsetDateTime.parse(timeHeader).toZonedDateTime();
                 } catch (Exception e) {
                     System.err.println("Failed to parse time header: " + timeHeader);
                 }
@@ -95,7 +98,7 @@ public class CloudEventSinkController {
     // Health check endpoint for Knative
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
-        return ResponseEntity.ok(Map.of("status", "healthy", "timestamp", LocalDateTime.now().toString()));
+        return ResponseEntity.ok(Map.of("status", "healthy", "timestamp", LocalDateTime.now().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
     }
 
     // Debug endpoint to see all headers
@@ -107,7 +110,7 @@ public class CloudEventSinkController {
         return ResponseEntity.ok(Map.of(
             "headers", headers.toSingleValueMap(),
             "body", body != null ? body : "null",
-            "timestamp", LocalDateTime.now().toString()
+            "timestamp", LocalDateTime.now().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         ));
     }
 }

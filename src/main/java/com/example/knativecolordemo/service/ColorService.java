@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +22,12 @@ public class ColorService {
             return latest.get();
         }
         // Default to RED if no color has been set
-        ColorChange defaultColor = new ColorChange(ColorChange.Color.RED, LocalDateTime.now(), "default");
+        ColorChange defaultColor = new ColorChange(ColorChange.Color.RED, ZonedDateTime.now(), "default");
         return colorChangeRepository.save(defaultColor);
     }
 
     public ColorChange setColor(ColorChange.Color color, String source) {
-        ColorChange colorChange = new ColorChange(color, LocalDateTime.now(), source);
+        ColorChange colorChange = new ColorChange(color, ZonedDateTime.now(), source);
         return colorChangeRepository.save(colorChange);
     }
 

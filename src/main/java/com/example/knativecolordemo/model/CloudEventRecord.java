@@ -1,7 +1,7 @@
 package com.example.knativecolordemo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "cloud_events")
@@ -21,7 +21,7 @@ public class CloudEventRecord {
     private String source;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     @Column(columnDefinition = "TEXT")
     private String data;
@@ -32,7 +32,7 @@ public class CloudEventRecord {
     public CloudEventRecord() {}
 
     public CloudEventRecord(String eventId, String eventType, String source,
-                           LocalDateTime timestamp, String data, String subject) {
+                           ZonedDateTime timestamp, String data, String subject) {
         this.eventId = eventId;
         this.eventType = eventType;
         this.source = source;
@@ -54,8 +54,8 @@ public class CloudEventRecord {
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public ZonedDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(ZonedDateTime timestamp) { this.timestamp = timestamp; }
 
     public String getData() { return data; }
     public void setData(String data) { this.data = data; }
