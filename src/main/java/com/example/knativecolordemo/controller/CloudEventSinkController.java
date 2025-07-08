@@ -5,6 +5,11 @@ import com.example.knativecolordemo.service.CloudEventService;
 import com.example.knativecolordemo.service.ColorService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.cloudevents.CloudEvent;
+import io.cloudevents.core.message.MessageReader;
+import io.cloudevents.http.HttpMessageFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +40,21 @@ public class CloudEventSinkController {
             @RequestHeader HttpHeaders headers) {
 
         try {
+
+            // Parse the CloudEvent from HTTP request
+            MessageReader messageReader = HttpMessageFactory.createReader(
+                headers.toSingleValueMap(),
+                body != null ? body.getBytes() : new byte[0]
+            );
+
+            CloudEvent event = messageReader.toEvent();
             // Extract CloudEvent headers
-            String eventId = headers.getFirst("ce-id");
-            String eventType = headers.getFirst("ce-type");
-            String source = headers.getFirst("ce-source");
-            String specVersion = headers.getFirst("ce-specversion");
-            String subject = headers.getFirst("ce-subject");
-            String timeHeader = headers.getFirst("ce-time");
+            String eventId = event.getId();
+            String eventType = event.getType();
+            String source = event.getSource().toString();
+            String specVersion = event.getSpecVersion().toString();
+            String subject = event.getSubject();
+            String timeHeader = event.getTime().toString();
 
             // Set defaults if headers are missing
             if (eventId == null) eventId = "unknown-" + System.currentTimeMillis();
@@ -63,13 +76,17 @@ public class CloudEventSinkController {
             System.out.println("  ID: " + eventId);
             System.out.println("  Type: " + eventType);
             System.out.println("  Source: " + source);
+            System.out.println("  Subject: " + subject);
+            System.out.println("  Time: " + timeHeader);
             System.out.println("  Data: " + data);
+
 
             // Save the cloud event
             cloudEventService.saveCloudEvent(eventId, eventType, source, timestamp, data, subject);
 
             // Check if this is a color change event
-            if ("com.example.color.change".equals(eventType) && body != null && !body.trim().isEmpty()) {
+
+            if ((eventType.equals("com.example.color.change") || eventType.equals("com.example.color.manual.change")) && body != null && !body.trim().isEmpty()) {
                 try {
                     JsonNode jsonData = objectMapper.readTree(body);
                     if (jsonData.has("color")) {
