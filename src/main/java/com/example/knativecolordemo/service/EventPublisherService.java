@@ -1,23 +1,26 @@
 package com.example.knativecolordemo.service;
 
 import io.cloudevents.CloudEvent;
+import io.cloudevents.core.message.MessageWriter;
 import io.cloudevents.core.builder.CloudEventBuilder;
+import io.cloudevents.http.HttpMessageFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import com.example.knativecolordemo.model.ColorChange;
 import com.example.knativecolordemo.model.ColorChange.Color;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -30,11 +33,10 @@ public class EventPublisherService {
     @Value("${knative.broker.url:http://broker-ingress.knative-eventing.svc.cluster.local/eventing-demo/default}")
     private String brokerUrl;
 
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     public EventPublisherService() {
-        this.restTemplate = new RestTemplate();
+
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
     }    public void publishManualColorChangeEvent(Color color, ZonedDateTime timestamp, String source) {
@@ -49,8 +51,10 @@ public class EventPublisherService {
             // Build CloudEvent
             CloudEvent event = CloudEventBuilder.v1()
                     .withId(UUID.randomUUID().toString())
-                    .withType("com.example.color.manual.change")
+                    // .withType("com.example.color.manual.change")
+                    .withType("com.example.color.change")
                     .withSource(URI.create("com.example.knativecolordemo"))
+                    .withSubject("manual-color-change")
                     .withTime(OffsetDateTime.now())
                     .withData("application/json", eventDataBytes)
                     .build();
@@ -63,29 +67,37 @@ public class EventPublisherService {
         }
     }
 
-    private void publishEvent(CloudEvent event) {
+      private void publishEvent(CloudEvent event) {
         try {
-            // Convert CloudEvent to HTTP format
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Ce-Id", event.getId());
-            headers.set("Ce-Specversion", event.getSpecVersion().toString());
-            headers.set("Ce-Type", event.getType());
-            headers.set("Ce-Source", event.getSource().toString());
-            headers.set("Ce-Time", event.getTime().toString());
 
-            // Get event data as string
-            String eventDataJson = "";
-            if (event.getData() != null) {
-                eventDataJson = new String(event.getData().toBytes());
-            }
-
-            HttpEntity<String> request = new HttpEntity<>(eventDataJson, headers);
+            URL url = URI.create(brokerUrl).toURL();
+            HttpURLConnection httpUrlConnection = (HttpURLConnection) url.openConnection();
+            httpUrlConnection.setRequestMethod("POST");
+            httpUrlConnection.setDoOutput(true);
+            httpUrlConnection.setDoInput(true);
 
             logger.info("sending message to broker {}", brokerUrl);
 
-            // Send HTTP POST to broker
-            restTemplate.exchange(brokerUrl, HttpMethod.POST, request, String.class);
+            MessageWriter messageWriter = createMessageWriter(httpUrlConnection);
+            messageWriter.writeBinary(event);
+
+            // Actually send the request and get the response
+            int responseCode = httpUrlConnection.getResponseCode();
+            logger.info("Broker response code: {}", responseCode);
+
+            if (responseCode >= 200 && responseCode < 300) {
+                logger.info("Successfully published event: {} ({})", event.getId(), event.getType());
+            } else {
+                // Read error response
+                String errorResponse = "";
+                try {
+                    errorResponse = new String(httpUrlConnection.getErrorStream().readAllBytes());
+                } catch (Exception e) {
+                    // Ignore error reading error stream
+                }
+                logger.error("Failed to publish event. Response code: {}, Error: {}", responseCode, errorResponse);
+                throw new RuntimeException("Failed to publish event. Response code: " + responseCode);
+            }
 
             logger.info("Successfully published event: {} ({})", event.getId(), event.getType());
 
@@ -93,5 +105,24 @@ public class EventPublisherService {
             logger.error("Error publishing event to broker", e);
             throw new RuntimeException("Failed to publish event", e);
         }
+    }
+
+    private static MessageWriter createMessageWriter(HttpURLConnection httpUrlConnection) {
+        return HttpMessageFactory.createWriter(
+            httpUrlConnection::setRequestProperty,
+            body -> {
+                try {
+                    if (body != null) {
+                        httpUrlConnection.setRequestProperty("content-length", String.valueOf(body.length));
+                        try (OutputStream outputStream = httpUrlConnection.getOutputStream()) {
+                            outputStream.write(body);
+                        }
+                    } else {
+                        httpUrlConnection.setRequestProperty("content-length", "0");
+                    }
+                } catch (IOException t) {
+                    throw new UncheckedIOException(t);
+                }
+            });
     }
 }
