@@ -36,6 +36,7 @@ async function loadAvailableColors() {
 async function setColor() {
     const select = document.getElementById('color-select');
     const color = select.value;
+    const publish = document.getElementById('publish-checkbox').checked;
 
     if (!color) {
         showNotification('Please select a color', 'warning');
@@ -50,7 +51,8 @@ async function setColor() {
             },
             body: JSON.stringify({
                 color: color,
-                source: 'manual'
+                source: 'manual',
+                publish: `${publish}`
             })
         });
 

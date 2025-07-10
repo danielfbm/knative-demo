@@ -1,0 +1,97 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: knative-color
+spec:
+  params:
+    - default: https://github.com/danielfbm/knative-demo.git
+      name: repo
+      type: string
+    - default: main
+      name: ref
+      type: string
+  tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: $(params.repo)
+        - name: revision
+          value: $(params.ref)
+        - name: refspec
+          value: ""
+        - name: subdirectory
+          value: .
+        - name: sparseCheckoutDirectories
+          value: ""
+        - name: httpProxy
+          value: ""
+        - name: httpsProxy
+          value: ""
+        - name: noProxy
+          value: ""
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: catalog
+            value: catalog
+          - name: name
+            value: git-clone
+          - name: version
+            value: "0.9"
+        resolver: hub
+      timeout: 30m0s
+      workspaces:
+        - name: output
+          workspace: source
+    - name: maven
+      params:
+        - name: MAVEN_MIRROR_URL
+          value: http://ucloud-nexus.alauda.cn:8081/repository/maven2
+      runAfter:
+        - git-clone
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: catalog
+            value: catalog
+          - name: name
+            value: maven
+          - name: version
+            value: "0.5"
+        resolver: hub
+      timeout: 30m0s
+      workspaces:
+        - name: source
+          workspace: source
+    - name: buildah
+      params:
+        - name: IMAGES
+          value:
+            - devops-harbor.alaudatech.net/library/knative-color:latest
+        - name: BUILD_EXTRA_ARGS
+          value: --build-arg
+            BASE_IMAGE=devops-harbor.alaudatech.net/library/eclipse-temurin:17-jdk-noble
+      runAfter:
+        - maven
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: catalog
+            value: catalog
+          - name: name
+            value: buildah
+          - name: version
+            value: "0.9"
+        resolver: hub
+      timeout: 30m0s
+      workspaces:
+        - name: source
+          workspace: source
+        - name: dockerconfig
+          workspace: docker
+  workspaces:
+    - name: source
+    - name: docker

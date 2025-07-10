@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+knative:
+  broker:
+    url: http://broker-ingress.knative-operator.svc.cluster.local/my-app-namespace/default
+
+logging:
+  level:
+    com.example: DEBUG

@@ -1,9 +1,5 @@
 # Kubernetes Deployment Summary
 
-## ✅ Successfully Deployed to Kubernetes!
-
-The Knative Color Demo application is now running in your Kubernetes cluster (OrbStack).
-
 ### 📋 Deployment Details
 
 **Namespace**: `eventing-demo`
