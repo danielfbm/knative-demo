@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-event-app
+  namespace: my-app-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-event-app
+  template:
+    metadata:
+      labels:
+        app: springboot-event-app
+    spec:
+      containers:
+      - name: springboot-event-app
+        image: danielfbm/eventconsumer:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: KNATIVE_BROKER_URL
+          value: "http://broker-ingress.knative-operator.svc.cluster.local/eventing-demo/default"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-event-app
+  namespace: my-app-namespace
+spec:
+  selector:
+    app: springboot-event-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
