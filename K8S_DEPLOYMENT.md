@@ -97,3 +97,4 @@ kubectl delete -f config/k8s-deployment.yaml
    ```
 
 The application is now successfully running in Kubernetes and ready for production use! 🎉
+
